@@ -1,0 +1,10 @@
+body {
+}
+
+#tblParametersForm {
+    width: 100%;
+}
+
+#tblParametersForm input[type="text"] {
+    width: 100%;
+}
