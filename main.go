@@ -3,10 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/urfave/cli/v2"
-	"html/template"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -41,22 +38,22 @@ func main() {
 	if port == "" {
 		port = "8080" // Dejar en 8080 sino no sube en el scope
 	}
-	router := mux.NewRouter()
-	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
-	router.HandleFunc("/", IndexHandler)
-	fmt.Println("Starting up on " + port)
-	http.ListenAndServe(":" + port, router)
+	//router := mux.NewRouter()
+	//router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
+	//router.HandleFunc("/", IndexHandler)
+	//fmt.Println("Starting up on " + port)
+	//http.ListenAndServe(":" + port, router)
 
-	//app := newApp()
-	//if err := app.Run(os.Args); err != nil {
-	//	fmt.Println(err)
-	//}
+	app := newApp()
+	if err := app.Run(os.Args); err != nil {
+		fmt.Println(err)
+	}
 }
 
-func IndexHandler(w http.ResponseWriter, r *http.Request){
-	tmpl := template.Must(template.ParseFiles("static/index.html"))
-	tmpl.Execute(w, nil)
-}
+//func IndexHandler(w http.ResponseWriter, r *http.Request){
+//	tmpl := template.Must(template.ParseFiles("static/index.html"))
+//	tmpl.Execute(w, nil)
+//}
 
 func newApp() *cli.App {
 	app := cli.NewApp()
