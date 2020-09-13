@@ -176,8 +176,12 @@ func summaryFieldError() {
 }
 
 func getPercentValues(total int, match int, error int) (string, string) {
-	percentMatch := float64(match) * 100 / float64(total)
-	percentError := float64(error) * 100 / float64(total)
+	percentMatch := float64(0)
+	percentError := float64(0)
+	if total != 0 {
+		percentMatch = float64(match) * 100 / float64(total)
+		percentError = float64(error) * 100 / float64(total)
+	}
 	return fmt.Sprintf("%.2f", percentMatch), fmt.Sprintf("%.2f", percentError)
 }
 
