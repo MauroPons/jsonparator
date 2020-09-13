@@ -1,14 +1,16 @@
 package main
 
-import "sync"
+import (
+	"sync"
+)
 
 type Consumer struct {
-	Exclude        string
+	Exclude []string
 }
 
 func NewConsumer() *Consumer {
 	return &Consumer{
-		Exclude:   options.Exclude,
+		Exclude: options.Exclude,
 	}
 }
 
@@ -32,35 +34,42 @@ func (consumer Consumer) Consume(streamProducer <-chan HostsPair) <-chan StatusV
 }
 
 func (consumer Consumer) validate(hostsPair HostsPair) StatusValidationError {
-	return StatusValidationError {
+	isOk, fieldError := isComparisonJsonResponseOk(hostsPair, consumer.Exclude)
+	return StatusValidationError{
 		RelativePath:   hostsPair.RelativeURL,
-		IsComparisonOk: isComparisonJsonResponseOk(hostsPair, consumer.Exclude),
+		IsComparisonOk: isOk,
+		FieldError:     fieldError,
 	}
 }
 
-func isComparisonJsonResponseOk(hostsPair HostsPair, excludeField string) bool {
+func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bool, string) {
 	if hostsPair.Has401() {
 		panic("Authorization problem")
 	}
 	if hostsPair.HasErrors() || !hostsPair.EqualStatusCode() {
-		return false
+		return false, "diff-status-code"
 	}
 	leftJSON, err := unmarshal(hostsPair.Left.Body)
 	if err != nil {
-		return false
+		return false, "error-unmarshal-left"
 	}
-	rightJSON, err := unmarshal(hostsPair.Left.Body)
+	rightJSON, err := unmarshal(hostsPair.Right.Body)
 	if err != nil {
-		return false
+		return false, "error-unmarshal-right"
 	}
-	if options.Exclude != "" {
-		Remove(leftJSON, excludeField)
-		Remove(rightJSON, excludeField)
+
+	if len(options.Exclude) > 0 {
+		for _, excludeField := range excludeFields {
+			Remove(leftJSON, excludeField)
+			Remove(rightJSON, excludeField)
+		}
 	}
-	if !Equal(leftJSON, rightJSON) {
-		return false
+	isEqual, FieldError := Equal(leftJSON, rightJSON)
+	if !isEqual {
+		fieldErrorCounter.Add(FieldError)
+		return false, FieldError
 	}
-	return true
+	return true, "ok"
 }
 
 func unmarshal(b []byte) (interface{}, error) {
@@ -74,4 +83,5 @@ func unmarshal(b []byte) (interface{}, error) {
 type StatusValidationError struct {
 	RelativePath   string
 	IsComparisonOk bool
+	FieldError     string
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type Producer struct {
-	client     *http.Client
+	client *http.Client
 }
 
 type HostsPair struct {
@@ -28,7 +28,7 @@ type Host struct {
 
 func NewProducer() *Producer {
 	return &Producer{
-		client:getHttpClient(),
+		client: getHttpClient(),
 	}
 }
 
@@ -42,28 +42,27 @@ func (producer Producer) Produce(streamReader <-chan URLPair) <-chan HostsPair {
 		defer close(streamProducer)
 		var wg sync.WaitGroup
 		wg.Add(options.Currency)
-		velocityRPS := 60000/(options.Velocity + 100)
+		velocityRPS := 60000 / (options.Velocity)
 		limiter := time.Tick(time.Duration(velocityRPS) * time.Millisecond)
 		for w := 0; w < options.Currency; w++ {
 			go func() {
 				defer wg.Done()
 				for readerValue := range streamReader {
 					<-limiter
-					if !strings.Contains(readerValue.RelativePath, "request_uri") {
+					if !strings.Contains(readerValue.RelativePath, "request_ur") {
 						streamProducer <- producer.process(readerValue)
 					}
 				}
 			}()
 		}
 		wg.Wait()
-
 	}()
 	return streamProducer
 }
 
 func (producer *Producer) process(pair URLPair) HostsPair {
 	work := func(url URL) <-chan Host {
-		channelHost := make(chan Host, 1000)
+		channelHost := make(chan Host)
 		go func() {
 			defer close(channelHost)
 			channelHost <- producer.fetch(url)
@@ -102,14 +101,14 @@ func (producer Producer) fetch(url URL) Host {
 		request.Header.Add(splitKey[0], splitKey[1])
 	}
 	// try 1
-	response, err  := producer.client.Do(request)
+	response, err := producer.client.Do(request)
 	if err != nil {
 		host.Error = err
 		return host
 	}
 	if response.StatusCode != 200 {
 		// retry 2
-		response, err  = producer.client.Do(request)
+		response, err = producer.client.Do(request)
 		if err != nil {
 			host.Error = err
 			return host
@@ -117,7 +116,7 @@ func (producer Producer) fetch(url URL) Host {
 	}
 	if response.StatusCode != 200 {
 		// retry 3
-		response, err  = producer.client.Do(request)
+		response, err = producer.client.Do(request)
 		if err != nil {
 			host.Error = err
 			return host

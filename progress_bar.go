@@ -1,23 +1,24 @@
 package main
 
 import (
-	"gopkg.in/cheggaaa/pb.v1"
 	"sync"
+
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 type ProgressBar struct {
-	totalPb *pb.ProgressBar
+	//totalPb *pb.ProgressBar
 	okPb    *pb.ProgressBar
 	errorPb *pb.ProgressBar
 	pool    *pb.Pool
 }
 
 func NewProgressBar() *ProgressBar {
-	totalPb := makeProgressBar(options.FilePathTotalLines, "TOTAL")
+	//totalPb := makeProgressBar(options.FilePathTotalLines, "TOTAL")
 	okPb := makeProgressBar(options.FilePathTotalLines, "OK")
 	errorPb := makeProgressBar(options.FilePathTotalLines, "ERROR")
 	return &ProgressBar{
-		totalPb,okPb,errorPb,nil,
+		okPb, errorPb, nil,
 	}
 }
 
@@ -39,12 +40,8 @@ func (p *ProgressBar) IncrementError() {
 	p.errorPb.Add(1)
 }
 
-func (p *ProgressBar) IncrementTotal() {
-	p.totalPb.Add(1)
-}
-
 func (p *ProgressBar) Start() {
-	pool, err := pb.StartPool(p.totalPb, p.okPb, p.errorPb)
+	pool, err := pb.StartPool(p.okPb, p.errorPb)
 	if err != nil {
 		panic(err)
 	}
@@ -54,7 +51,7 @@ func (p *ProgressBar) Start() {
 
 func (p *ProgressBar) Stop() {
 	wg := new(sync.WaitGroup)
-	for _, bar := range []*pb.ProgressBar{p.totalPb, p.okPb, p.errorPb} {
+	for _, bar := range []*pb.ProgressBar{p.okPb, p.errorPb} {
 		wg.Add(1)
 		go func(cb *pb.ProgressBar) {
 			cb.Finish()

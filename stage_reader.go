@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"net/url"
 	"os"
+	"strings"
 )
 
 type Reader struct {
-	file	*os.File
-	hosts	[]string
+	file  *os.File
+	hosts []string
 }
 
 type URLPair struct {
@@ -24,32 +25,34 @@ type URL struct {
 
 func NewReader() *Reader {
 	return &Reader{
-		file:  fileSource,
+		file:  fileRelativePathSource,
 		hosts: options.Hosts,
 	}
 }
 
 func (reader *Reader) Read() <-chan URLPair {
 	streamReader := make(chan URLPair)
-	go func(){
+	go func() {
 		defer close(streamReader)
+		_, _ = reader.file.Seek(0, 0)
 		scanner := bufio.NewScanner(reader.file)
 		count := 0
 		for scanner.Scan() {
-			count++
 			relativePath := scanner.Text()
+			if !strings.Contains(relativePath, "request_ur") {
+				count++
+				leftUrl := URL{}
+				leftUrl.URL, leftUrl.Error = getUrl(reader.hosts[0], relativePath)
 
-			leftUrl := URL{}
-			leftUrl.URL, leftUrl.Error = getUrl(reader.hosts[0], relativePath)
+				rightUrl := URL{}
+				rightUrl.URL, rightUrl.Error = getUrl(reader.hosts[1], relativePath)
 
-			rightUrl := URL{}
-			rightUrl.URL, rightUrl.Error = getUrl(reader.hosts[1], relativePath)
-
-			streamReader <- URLPair{
-				pathLineNumber: count,
-				RelativePath:   relativePath,
-				UrlLeft:        leftUrl,
-				UrlRight:       rightUrl,
+				streamReader <- URLPair{
+					pathLineNumber: count,
+					RelativePath:   relativePath,
+					UrlLeft:        leftUrl,
+					UrlRight:       rightUrl,
+				}
 			}
 		}
 	}()

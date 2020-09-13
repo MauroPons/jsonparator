@@ -3,10 +3,10 @@ package main
 import "context"
 
 type Pipeline struct {
-	reader 		*Reader
-	producer 	*Producer
-	consumer 	*Consumer
-	writer 		*Writer
+	reader   *Reader
+	producer *Producer
+	consumer *Consumer
+	writer   *Writer
 }
 
 func NewPipeline() *Pipeline {

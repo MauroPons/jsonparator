@@ -1,59 +1,58 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
-	"github.com/urfave/cli/v2"
+	"math"
+	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strconv"
+	"sort"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/olekukonko/tablewriter"
+
+	"github.com/urfave/cli/v2"
 )
 
-var options 			*InputData
-var fileSource 			*os.File
-var fileError 			*os.File
-var progressBar			*ProgressBar
+var options *InputData
+var fileRelativePathSource *os.File
+var fileRelativePathError *os.File
+var progressBar *ProgressBar
+var arrayAllParamsSorted []string
+var mapFileParams = make(map[string]*os.File)
+var fieldErrorCounter = FieldErrorCounter{mapField: make(map[string]int)}
 
 type InputData struct {
-	FilePathSource     string
-	FilePathTotalLines int
-	FilePathError      string
-	BasePath           string
-	FileName           string
-	Velocity           int
-	Hosts              []string
-	Headers            []string
-	ParametersCutting  []string
-	Exclude            string
-	CallerScope        string
-	Currency 		   int
+	Hosts                          []string
+	Headers                        []string
+	Exclude                        []string
+	SeparateInFilesNotContainParam []string
+	FilePathSource                 string
+	FilePathError                  string
+	BasePath                       string
+	FileName                       string
+	CallerScope                    string
+	Velocity                       int
+	FilePathTotalLines             int
+	FilePathTotalLinesError        int
+	Currency                       int
+}
+
+type FieldErrorCounter struct {
+	mapField map[string]int
+	mux      sync.Mutex
 }
 
 func main() {
-
-	port := os.Getenv("PORT") // To build use WJC_PORT instead of PORT
-	if port == "" {
-		port = "8080" // Dejar en 8080 sino no sube en el scope
-	}
-	//router := mux.NewRouter()
-	//router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
-	//router.HandleFunc("/", IndexHandler)
-	//fmt.Println("Starting up on " + port)
-	//http.ListenAndServe(":" + port, router)
-
 	app := newApp()
 	if err := app.Run(os.Args); err != nil {
 		fmt.Println(err)
 	}
 }
-
-//func IndexHandler(w http.ResponseWriter, r *http.Request){
-//	tmpl := template.Must(template.ParseFiles("static/index.html"))
-//	tmpl.Execute(w, nil)
-//}
 
 func newApp() *cli.App {
 	app := cli.NewApp()
@@ -63,36 +62,36 @@ func newApp() *cli.App {
 
 	app.Flags = []cli.Flag{
 		&cli.StringFlag{
-			Name:  "path",
-			Usage: "specifies the file from which to read targets. It should contain one column only with a rel RelativePath. eg: /v1/cards?query=123",
+			Name:    "path",
+			Aliases: []string{"P"},
+			Usage:   "Specifies the file from which to read targets. It should contain one column only with a rel RelativePath. eg: /v1/cards?query=123",
 		},
 		&cli.StringSliceFlag{
 			Name:  "host",
-			Usage: "targeted hosts. Exactly 2 must be specified. eg: --host 'http://host1.com --host 'http://host2.com'",
+			Usage: "Targeted hosts. Exactly 2 must be specified. eg: --host 'http://host1.com --host 'http://host2.com'",
 		},
 		&cli.StringSliceFlag{
 			Name:    "header",
 			Aliases: []string{"H"},
-			Usage:   "headers to be used in the http call",
+			Usage:   "Headers to be used in the http call",
 		},
 		&cli.IntFlag{
 			Name:    "velocity",
-			Aliases: []string{"k"},
+			Aliases: []string{"V"},
 			Value:   4,
 			Usage:   "Set comparators velocity in K RPM",
 		},
-		&cli.StringFlag{
-			Name:  "exclude",
-			Usage: "excludes a value from both json for the specified RelativePath. A RelativePath is a series of keys separated by a dot or #",
-			Value: "results.#.payer_costs.#.payment_method_option_id",
+		&cli.StringSliceFlag{
+			Name:    "exclude",
+			Aliases: []string{"E"},
+			Usage:   "Excludes a value from both json for the specified RelativePath. A RelativePath is a series of keys separated by a dot or #",
 		},
-		&cli.StringFlag{
-			Name:  "parametersCutting",
-			Usage: "check is request contains the params parametrized #",
-			Value: "caller_id,display_filtered,differential_pricing_id,bins,public_key",
+		&cli.StringSliceFlag{
+			Name:    "requestNotContainParam",
+			Aliases: []string{"M"},
+			Usage:   "Separate into files the requests that not contain parameter. At set this value the separateFileByParameters is turned on automatically#",
 		},
 	}
-
 	app.Action = action
 	return app
 }
@@ -100,18 +99,21 @@ func newApp() *cli.App {
 func action(contextClient *cli.Context) error {
 	options = parseFlags(contextClient)
 
-	CreateAndOpenDashboardInBrowser()
-
-	context, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+	context, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	fileSource = openFile()
-	defer fileSource.Close()
+	fileRelativePathSource = openFile()
+	defer fileRelativePathSource.Close()
 
-	fileError = createFileError()
-	defer fileError.Close()
+	options.FilePathTotalLines = GetTotalLines(fileRelativePathSource)
 
-	calculateTotalLinesOfSourceFile()
+	fileRelativePathError = createFileError()
+	defer fileRelativePathError.Close()
+
+	arrayAllParamsSorted = getAllParamsSorted(fileRelativePathSource)
+	createFilesByParams(arrayAllParamsSorted, "source")
+	createFilesByParams(arrayAllParamsSorted, "error")
+	loadFileByParams(fileRelativePathSource, "source")
 
 	progressBar = NewProgressBar()
 	progressBar.Start()
@@ -121,25 +123,131 @@ func action(contextClient *cli.Context) error {
 
 	progressBar.Stop()
 
+	summaryFieldError()
+	separateFilesByParams()
+
 	return nil
 }
 
-func calculateTotalLinesOfSourceFile() {
-	out, err0 := exec.Command("wc", "-l", options.FilePathSource).Output()
-	if err0 != nil {
-		panic("Error getting total line of file: " + options.FilePathSource + "\n")
+func separateFilesByParams() {
+	fmt.Println("Summary param's cuts: ")
+	dir := options.BasePath + "/table-summary.csv"
+	fileSummary, _ := os.Create(dir)
+	w := bufio.NewWriter(fileSummary)
+	fmt.Fprintln(w, fmt.Sprintln("PARAMS,TOTAL,CORRECT,INCORRECT,%CORRECT,%INCORRECT"))
+	matchTotal := int(math.Abs(float64(options.FilePathTotalLines - options.FilePathTotalLinesError)))
+	percentMatch, percentError := getPercentValues(options.FilePathTotalLines, matchTotal, options.FilePathTotalLinesError)
+	fmt.Fprintln(w, fmt.Sprintln("GENERAL,", options.FilePathTotalLines, ",", matchTotal, ",", options.FilePathTotalLinesError, ",", percentMatch, ",", percentError))
+	w.Flush()
+
+	for _, param := range arrayAllParamsSorted {
+		total, match, error := getCountRowsByParams(param)
+		percentMatch, percentError := getPercentValues(total, match, error)
+		fmt.Fprintln(w, fmt.Sprintln(strings.ToUpper(param), ",", total, ",", match, ",", error, ",", percentMatch, ",", percentError))
+		w.Flush()
 	}
-	outString := strings.Trim(string(out), " ")
-	valueString := strings.Split(outString, " ")[0]
-	var total, err1 = strconv.ParseUint(valueString, 10, 32)
-	if err1 != nil {
-		panic("Error getting total line of file: " + options.FilePathSource + "\n")
+
+	table, _ := tablewriter.NewCSV(os.Stdout, dir, true)
+	table.SetAlignment(tablewriter.ALIGN_LEFT) // Set Alignment
+	table.Render()
+
+}
+
+func summaryFieldError() {
+	fmt.Println("Summary field's error: ")
+	var arrayFieldError []string
+	for key := range fieldErrorCounter.mapField {
+		arrayFieldError = append(arrayFieldError, key)
 	}
-	options.FilePathTotalLines = int(total)
+	sort.Strings(arrayFieldError)
+	dir := options.BasePath + "/common-error-summary.csv"
+	fileSummary, _ := os.Create(dir)
+	w := bufio.NewWriter(fileSummary)
+	fmt.Fprintln(w, fmt.Sprintln("ATTRIBUTES,INCORRECT"))
+	for index := range arrayFieldError {
+		total := fieldErrorCounter.mapField[arrayFieldError[index]]
+		fmt.Fprintln(w, fmt.Sprintln(arrayFieldError[index], ",", total))
+		w.Flush()
+	}
+	table, _ := tablewriter.NewCSV(os.Stdout, dir, true)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	// Set Alignment
+	table.Render()
+}
+
+func getPercentValues(total int, match int, error int) (string, string) {
+	percentMatch := float64(match) * 100 / float64(total)
+	percentError := float64(error) * 100 / float64(total)
+	return fmt.Sprintf("%.2f", percentMatch), fmt.Sprintf("%.2f", percentError)
+}
+
+func getCountRowsByParams(param string) (int, int, int) {
+	total := GetTotalLines(mapFileParams["source-"+param])
+	error := GetTotalLines(mapFileParams["error-"+param])
+	match := int(math.Abs(float64(total - error)))
+	return total, match, error
+}
+
+func loadFileByParams(file *os.File, s string) {
+	_, _ = file.Seek(0, 0)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		relativePath := scanner.Text()
+		addRelativePathToFileParam(relativePath, "source")
+	}
+}
+
+func createFilesByParams(array []string, prefix string) {
+	for _, param := range array {
+		nameFile := prefix + "-" + param
+		relativePaths := options.BasePath + "relative-paths/"
+		_ = os.Mkdir(relativePaths, 0777)
+		pathFileParam := relativePaths + nameFile + ".txt"
+		file, _ := os.Create(pathFileParam)
+		mapFileParams[nameFile] = file
+	}
+}
+
+func getAllParamsSorted(file *os.File) []string {
+	var arrayParamsSorted []string
+	scanner := bufio.NewScanner(file)
+	_, _ = file.Seek(0, 0)
+	mapParams := make(map[string]bool)
+	for scanner.Scan() {
+		relativePath := scanner.Text()
+		urlParse, err := url.Parse(relativePath)
+		if err != nil {
+			panic(err)
+		}
+		mapValues, _ := url.ParseQuery(urlParse.RawQuery)
+		for key := range mapValues {
+			mapParams[key] = true
+		}
+	}
+	for key := range mapParams {
+		arrayParamsSorted = append(arrayParamsSorted, key)
+	}
+
+	for _, param := range options.SeparateInFilesNotContainParam {
+		arrayParamsSorted = append(arrayParamsSorted, param+"-no")
+	}
+	sort.Strings(arrayParamsSorted)
+	return arrayParamsSorted
+}
+
+func GetTotalLines(file *os.File) int {
+	count := 0
+	_, _ = file.Seek(0, 0)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		count++
+	}
+	return count
 }
 
 func createFileError() *os.File {
-	fmt.Println("Creating error file in %s", options.FilePathError)
+	fmt.Println("Creating error file in", options.FilePathError)
+
 	file, err := os.Create(options.FilePathError)
 	if err != nil {
 		panic("Can not read file: " + options.FilePathError)
@@ -148,7 +256,7 @@ func createFileError() *os.File {
 }
 
 func openFile() *os.File {
-	fmt.Println("Reading file from %s", options.FilePathSource)
+	fmt.Println("Reading file", options.FilePathError)
 	file, err := os.Open(options.FilePathSource)
 	if err != nil {
 		panic("Can not read file: " + options.FilePathSource)
@@ -167,11 +275,12 @@ func parseFlags(context *cli.Context) *InputData {
 	opts.FilePathSource = formatPath(context.String("path"))
 	opts.Headers = context.StringSlice("header")
 	opts.Velocity = context.Int("velocity") * 1000
-	opts.Exclude = context.String("exclude")
-	opts.ParametersCutting = strings.Split(context.String("parametersCutting"), ",")
+	opts.Exclude = context.StringSlice("exclude")
+	opts.SeparateInFilesNotContainParam = context.StringSlice("requestNotContainParam")
+
 	dir, fileName := filepath.Split(opts.FilePathSource)
 	path := dir + time.Now().Format("20060102150405")
-	_ = os.Mkdir(path , 0777)
+	_ = os.Mkdir(path, 0777)
 	opts.CallerScope = getCallerScope(opts)
 	opts.BasePath = path + "/" + opts.CallerScope + "/"
 	opts.FileName = strings.TrimSuffix(fileName, filepath.Ext(fileName))
@@ -182,7 +291,7 @@ func parseFlags(context *cli.Context) *InputData {
 
 func formatPath(relativePath string) string {
 	var finalPath = strings.Trim(strings.ReplaceAll(relativePath, "'", ""), "")
-	firstCharacter :=  finalPath[0:1]
+	firstCharacter := finalPath[0:1]
 	if firstCharacter != "/" {
 		finalPath = "/" + finalPath
 	}
@@ -199,10 +308,42 @@ func getCallerScope(options InputData) string {
 			h := strings.Split(header, ":")
 			if len(h) != 2 {
 				panic("Invalid header")
-			}else if h[0] == "X-Caller-Scopes"{
+			} else if h[0] == "X-Caller-Scopes" && h[1] != "" {
 				callerScopeTemp = h[1]
 			}
 		}
 	}
 	return callerScopeTemp
+}
+
+func addRelativePathToFileParam(relativePath string, prefix string) {
+	urlParse, err := url.Parse(relativePath)
+	if err != nil {
+		panic(err)
+	}
+	mapValues, _ := url.ParseQuery(urlParse.RawQuery)
+	for key := range mapValues {
+		file := mapFileParams[prefix+"-"+key]
+		w := bufio.NewWriter(file)
+		fmt.Fprintln(w, relativePath)
+		_ = w.Flush()
+	}
+
+	for _, param := range options.SeparateInFilesNotContainParam {
+		value := mapValues[param]
+		if value == nil {
+			key := prefix + "-" + param + "-no"
+			file := mapFileParams[key]
+			w := bufio.NewWriter(file)
+			fmt.Fprintln(w, relativePath)
+			_ = w.Flush()
+		}
+	}
+}
+
+func (c *FieldErrorCounter) Add(key string) {
+	c.mux.Lock()
+	// Lock so only one goroutine at a time can access the map c.v.
+	c.mapField[key]++
+	c.mux.Unlock()
 }
