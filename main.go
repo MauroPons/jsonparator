@@ -148,7 +148,19 @@ func separateFilesByParams() {
 	}
 
 	table, _ := tablewriter.NewCSV(os.Stdout, dir, true)
-	table.SetAlignment(tablewriter.ALIGN_LEFT) // Set Alignment
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetHeaderColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor})
+	table.SetColumnColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiGreenColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiRedColor})
 	table.Render()
 
 }
@@ -171,7 +183,10 @@ func summaryFieldError() {
 	}
 	table, _ := tablewriter.NewCSV(os.Stdout, dir, true)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	// Set Alignment
+	table.SetHeaderColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},)
+	table.SetColumnColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlueColor},)
 	table.Render()
 }
 
@@ -260,7 +275,7 @@ func createFileError() *os.File {
 }
 
 func openFile() *os.File {
-	fmt.Println("Reading file", options.FilePathError)
+	fmt.Println("Reading file", options.FilePathSource)
 	file, err := os.Open(options.FilePathSource)
 	if err != nil {
 		panic("Can not read file: " + options.FilePathSource)
