@@ -21,7 +21,8 @@ At the end of process you will find two folders (in the same location of base pa
 $   -P "/path/to/file/with/urls" 
     -host "https://host1.com" 
     -host "https://host2.com" 
-    -H "X-Auth-Token:82f14bd9f202e172d078d5589fd8d0d8532c08654f09763c15f84dccc81b7906" 
+    -H "X-Auth-Token:82f14bd9f202e172d078d5589fd8d0d8532c08654f09763c15f84dccc81b7906"
+    -V 2 
     -E "results.#.payer_costs.#.payment_method_option_id" 
     -E "paging" 
     -M "marketplace"
@@ -43,6 +44,9 @@ Targeted hosts. Exactly 2 hosts must be specified. eg: --host 'http://host1.com 
 
 #### `--header value, -H value`
 Headers to be used in the http call
+
+#### `--velocity value, -V value`
+Set comparators velocity in K RPM (default: 4)
 
 #### `--exclude value, -E value`
 Excludes a value from both json for the specified path. A path is a series of keys separated by a dot or #.<br>
