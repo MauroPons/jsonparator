@@ -5,7 +5,7 @@ At the end of process you will find two folders (in the same location of base pa
 
 ## Download and install
 
-    go get -u github.com/mauropons/jsonparator
+    export GO111MODULE=on;go get -u github.com/mauropons/jsonparator
 
 ## Create a file with relative URL
 
