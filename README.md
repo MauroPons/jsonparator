@@ -19,7 +19,7 @@ At the end of process you will find two folders (in the same location of base pa
 
 ```sh
     jsonparator 
-$   -P "/path/to/file/with/urls" 
+    -P "/path/to/file/with/urls" 
     -host "https://host1.com" 
     -host "https://host2.com" 
     -H "X-Auth-Token:82f14bd9f202e172d078d5589fd8d0d8532c08654f09763c15f84dccc81b7906"
