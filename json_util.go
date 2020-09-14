@@ -13,70 +13,42 @@ const (
 	diffValue       = "diff-value"
 )
 
-// Equal checks equality between 2 Body-encoded data.
+
 func Equal(vx interface{}, vy interface{}) (bool, string) {
 
 	if reflect.TypeOf(vx) != reflect.TypeOf(vy) {
 		return false, diffType
 	}
-
 	switch x := vx.(type) {
-	case map[string]interface{}:
-		y := vy.(map[string]interface{})
-
-		if len(x) != len(y) {
-			return false, diffLengthBody
-		}
-		fieldError := ""
-		for k, v := range x {
-			val2 := y[k]
-
-			if (v == nil) != (val2 == nil) {
-				return false, k
+		case map[string]interface{}:
+			y := vy.(map[string]interface{})
+			if len(x) != len(y) {
+				return false, diffLengthBody
 			}
-
-			isEqual, fieldErrorTemp := Equal(v, val2)
-			if !isEqual {
-				if fieldErrorTemp == diffValue || fieldErrorTemp == diffLengthArray || fieldErrorTemp == diffLengthBody {
-					fieldErrorTemp = k
-				} else {
-					fieldErrorTemp = k + ".#." + fieldErrorTemp
-				}
-				if fieldError == "" {
-					fieldError = fieldErrorTemp
-				}
-				return false, fieldError
-			}
-		}
-
-		return true, "ok"
-	case []interface{}:
-		y := vy.([]interface{})
-
-		if len(x) != len(y) {
-			return false, diffLengthArray
-		}
-
-		fieldError := ""
-		var matches int
-		flagged := make([]bool, len(y))
-		for _, v := range x {
-			for i, v2 := range y {
-				isEqual, fieldErrorTemp := Equal(v, v2)
-				if isEqual && !flagged[i] {
-					matches++
-					flagged[i] = true
-					break
-				}else if !isEqual && fieldError == "" {
-					fieldError = fieldErrorTemp
+			for k := range x {
+				isEqual, fieldError := Equal(x[k],y[k])
+				if !isEqual {
+					return false, k + ".#." + fieldError
 				}
 			}
-		}
-
-		return matches == len(x), fieldError
-	default:
-		return vx == vy, diffValue
+			return true, ""
+		case []interface{}:
+			y := vy.([]interface{})
+			if len(x) != len(y) {
+				return false, diffLengthArray
+			}
+			for index := range x {
+				isEqual, fieldError := Equal(x[index],y[index])
+				if !isEqual {
+					return false, fieldError
+				}
+			}
+			return true, ""
+		default:
+			return vx == vy, diffValue
 	}
+
+	return true, ""
 }
 
 func Remove(i interface{}, path string) {

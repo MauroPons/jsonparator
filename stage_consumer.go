@@ -64,10 +64,10 @@ func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bo
 			Remove(rightJSON, excludeField)
 		}
 	}
-	isEqual, FieldError := Equal(leftJSON, rightJSON)
+	isEqual, fieldError := Equal(leftJSON, rightJSON)
 	if !isEqual {
-		fieldErrorCounter.Add(FieldError)
-		return false, FieldError
+		fieldErrorCounter.Add(fieldError)
+		return false, fieldError
 	}
 	return true, "ok"
 }
