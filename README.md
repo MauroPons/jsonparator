@@ -50,7 +50,7 @@ Headers to be used in the http call
 Set comparators velocity in K RPM (default: 4)
 
 #### `--exclude value, -E value`
-Excludes a value from both json for the specified path. A path is a series of keys separated by a dot or #.<br>
+Excludes a value from both json for the specified path. A path is a series of keys separated by a dot or ".#."<br>
 Default "results.#.payer_costs.#.payment_method_option_id"
 
 #### `--requestNotContainParam, -M value`
