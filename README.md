@@ -18,6 +18,7 @@ At the end of process you will find two folders (in the same location of base pa
 ## Run
 
 ```sh
+    jsonparator 
 $   -P "/path/to/file/with/urls" 
     -host "https://host1.com" 
     -host "https://host2.com" 
