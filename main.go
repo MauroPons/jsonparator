@@ -150,17 +150,17 @@ func separateFilesByParams() {
 	table, _ := tablewriter.NewCSV(os.Stdout, dir, true)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.SetHeaderColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor})
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor})
 	table.SetColumnColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiGreenColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiRedColor})
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiGreenColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiRedColor})
 	table.Render()
 
 }
@@ -184,9 +184,9 @@ func summaryFieldError() {
 	table, _ := tablewriter.NewCSV(os.Stdout, dir, true)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.SetHeaderColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},)
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor})
 	table.SetColumnColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-						 tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlueColor},)
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlueColor})
 	table.Render()
 }
 
@@ -212,7 +212,7 @@ func loadFileByParams(file *os.File, s string) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		relativePath := scanner.Text()
-		addRelativePathToFileParam(relativePath, "source")
+		addRelativePathToFileParam(strings.Trim(relativePath, "\""), "source")
 	}
 }
 

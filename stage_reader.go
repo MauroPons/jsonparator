@@ -38,7 +38,7 @@ func (reader *Reader) Read() <-chan URLPair {
 		scanner := bufio.NewScanner(reader.file)
 		count := 0
 		for scanner.Scan() {
-			relativePath := scanner.Text()
+			relativePath := strings.Trim(scanner.Text(), "\"")
 			if !strings.Contains(relativePath, "request_ur") {
 				count++
 				leftUrl := URL{}
