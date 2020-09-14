@@ -27,7 +27,7 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 		if len(x) != len(y) {
 			return false, diffLengthBody
 		}
-
+		fieldError := ""
 		for k, v := range x {
 			val2 := y[k]
 
@@ -42,7 +42,10 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 				} else {
 					fieldErrorTemp = k + ".#." + fieldErrorTemp
 				}
-				return false, fieldErrorTemp
+				if fieldError == "" {
+					fieldError = fieldErrorTemp
+				}
+				return false, fieldError
 			}
 		}
 
@@ -54,22 +57,22 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 			return false, diffLengthArray
 		}
 
+		fieldError := ""
 		var matches int
 		flagged := make([]bool, len(y))
-		var fieldError string
 		for _, v := range x {
 			for i, v2 := range y {
 				isEqual, fieldErrorTemp := Equal(v, v2)
-				if !isEqual {
-					fieldError = fieldErrorTemp
-				}
 				if isEqual && !flagged[i] {
 					matches++
 					flagged[i] = true
 					break
+				}else if !isEqual && fieldError == "" {
+					fieldError = fieldErrorTemp
 				}
 			}
 		}
+
 		return matches == len(x), fieldError
 	default:
 		return vx == vy, diffValue
