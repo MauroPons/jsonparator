@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -13,42 +14,51 @@ const (
 	diffValue       = "diff-value"
 )
 
-
 func Equal(vx interface{}, vy interface{}) (bool, string) {
 
 	if reflect.TypeOf(vx) != reflect.TypeOf(vy) {
 		return false, diffType
 	}
 	switch x := vx.(type) {
-		case map[string]interface{}:
-			y := vy.(map[string]interface{})
-			if len(x) != len(y) {
-				return false, diffLengthBody
-			}
-			for k := range x {
-				isEqual, fieldError := Equal(x[k],y[k])
-				if !isEqual {
+	case map[string]interface{}:
+		y := vy.(map[string]interface{})
+		if len(x) != len(y) {
+			return false, diffLengthBody
+		}
+		var arrayKeys = make([]string, len(x))
+		for k := range x {
+			arrayKeys = append(arrayKeys, k)
+		}
+		sort.Strings(arrayKeys)
+
+		for i := range arrayKeys {
+			k := arrayKeys[i]
+			isEqual, fieldError := Equal(x[k], y[k])
+			if !isEqual {
+				if fieldError == diffLengthBody || fieldError == diffLengthArray || fieldError == diffType || fieldError == diffValue {
+					return false, k
+				} else {
 					return false, k + ".#." + fieldError
 				}
-			}
-			return true, ""
-		case []interface{}:
-			y := vy.([]interface{})
-			if len(x) != len(y) {
-				return false, diffLengthArray
-			}
-			for index := range x {
-				isEqual, fieldError := Equal(x[index],y[index])
-				if !isEqual {
-					return false, fieldError
-				}
-			}
-			return true, ""
-		default:
-			return vx == vy, diffValue
-	}
 
-	return true, ""
+			}
+		}
+		return true, ""
+	case []interface{}:
+		y := vy.([]interface{})
+		if len(x) != len(y) {
+			return false, diffLengthArray
+		}
+		for index := range x {
+			isEqual, fieldError := Equal(x[index], y[index])
+			if !isEqual {
+				return false, fieldError
+			}
+		}
+		return true, ""
+	default:
+		return vx == vy, diffValue
+	}
 }
 
 func Remove(i interface{}, path string) {

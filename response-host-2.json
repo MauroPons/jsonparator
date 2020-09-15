@@ -1,0 +1,43 @@
+{
+  "paging": {
+    "limit": 1000,
+    "offset": 0,
+    "total": 1
+  },
+  "results": [
+    {
+      "id": "master",
+      "issuer": {
+        "default": true,
+        "id": 204,
+        "name": "Mastercard"
+      },
+      "merchant_account_id": null,
+      "payer_costs": [
+        {
+          "base_installment_rate": 0,
+          "discount_rate": 0,
+          "id": 67697112,
+          "installment_full_cft": null,
+          "installment_full_tea": null,
+          "installment_rate": 0,
+          "installment_rate_collector": [
+            "MERCADOPAGO"
+          ],
+          "installment_reduced_cft": null,
+          "installment_reduced_tea": null,
+          "installments": 1,
+          "labels": [],
+          "max_allowed_amount": 50000000,
+          "min_allowed_amount": 1000,
+          "payment_method_option_id": "1.AQokYTQ0Nzg0YjctNmIwMS00MDBiLTljOTctZGIwZjc5NTRiMTk1EIrY45PJLg",
+          "reimbursement_rate": null
+        }
+      ],
+      "payment_type_id": "credit_card",
+      "processing_mode": "aggregator",
+      "secure_thumbnail": "https://www.mercadopago.com/org-img/MP3/API/logos/master.gif",
+      "thumbnail": "http://img.mlstatic.com/org-img/MP3/API/logos/master.gif"
+    }
+  ]
+}

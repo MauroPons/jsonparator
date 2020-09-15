@@ -1,0 +1,235 @@
+{
+  "paging": {
+    "total": 1,
+    "limit": 30,
+    "offset": 0
+  },
+  "results": [
+    {
+      "id": "codensa",
+      "issuer": {
+        "default": true,
+        "name": "Codensa",
+        "id": 1061
+      },
+      "merchant_account_id": null,
+      "payer_costs": [
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [],
+          "installments": 1,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "MERCADOPAGO"
+          ],
+          "id": 140903971,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        },
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [],
+          "installments": 2,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "THIRD_PARTY"
+          ],
+          "id": 140903972,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        },
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [],
+          "installments": 3,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "THIRD_PARTY"
+          ],
+          "id": 140903973,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        },
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [],
+          "installments": 4,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "THIRD_PARTY"
+          ],
+          "id": 140903974,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        },
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [],
+          "installments": 5,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "THIRD_PARTY"
+          ],
+          "id": 140903975,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        },
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [],
+          "installments": 6,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "THIRD_PARTY"
+          ],
+          "id": 110071609,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        },
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [],
+          "installments": 12,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "THIRD_PARTY"
+          ],
+          "id": 110071610,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        },
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [],
+          "installments": 18,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "THIRD_PARTY"
+          ],
+          "id": 110071612,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        },
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [],
+          "installments": 24,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "THIRD_PARTY"
+          ],
+          "id": 110071613,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        },
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [],
+          "installments": 36,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "THIRD_PARTY"
+          ],
+          "id": 110071614,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        },
+        {
+          "installment_reduced_tea": null,
+          "installment_reduced_cft": null,
+          "installment_rate": 0,
+          "installment_full_cft": null,
+          "discount_rate": 0,
+          "min_allowed_amount": 1000,
+          "installment_full_tea": null,
+          "labels": [
+            "recommended_installment"
+          ],
+          "installments": 48,
+          "reimbursement_rate": null,
+          "installment_rate_collector": [
+            "THIRD_PARTY"
+          ],
+          "id": 110071611,
+          "max_allowed_amount": 5000000,
+          "base_installment_rate": 0,
+          "payment_method_option_id": "1.AQokODllZjQyNjktYjAzMy00OWU1LWJhMWQtNDE0NjQyNTM3MzY4EJaFuevHLg"
+        }
+      ],
+      "payment_type_id": "credit_card",
+      "processing_mode": "aggregator",
+      "secure_thumbnail": "https://www.mercadopago.com/org-img/MP3/API/logos/codensa.gif",
+      "thumbnail": "http://img.mlstatic.com/org-img/MP3/API/logos/codensa.gif"
+    }
+  ]
+}
