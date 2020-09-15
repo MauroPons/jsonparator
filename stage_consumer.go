@@ -51,14 +51,17 @@ func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bo
 		panic("Authorization problem")
 	}
 	if hostsPair.HasErrors() || !hostsPair.EqualStatusCode() {
+		fieldErrorCounter.Add("diff-status-code")
 		return false, "diff-status-code", statusCodes
 	}
 	leftJSON, err := unmarshal(hostsPair.Left.Body)
 	if err != nil {
+		fieldErrorCounter.Add("error-unmarshal-left")
 		return false, "error-unmarshal-left", statusCodes
 	}
 	rightJSON, err := unmarshal(hostsPair.Right.Body)
 	if err != nil {
+		fieldErrorCounter.Add("error-unmarshal-right")
 		return false, "error-unmarshal-right", statusCodes
 	}
 
