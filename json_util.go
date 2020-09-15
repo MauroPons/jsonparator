@@ -25,7 +25,7 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 		if len(x) != len(y) {
 			return false, diffLengthBody
 		}
-		var arrayKeys = make([]string, len(x))
+		var arrayKeys []string
 		for k := range x {
 			arrayKeys = append(arrayKeys, k)
 		}
@@ -33,7 +33,9 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 
 		for i := range arrayKeys {
 			k := arrayKeys[i]
-			isEqual, fieldError := Equal(x[k], y[k])
+			xv := x[k]
+			yv := y[k]
+			isEqual, fieldError := Equal(xv, yv)
 			if !isEqual {
 				if fieldError == diffLengthBody || fieldError == diffLengthArray || fieldError == diffType || fieldError == diffValue {
 					return false, k

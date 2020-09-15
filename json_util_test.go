@@ -24,7 +24,9 @@ func TestEqual(t *testing.T) {
 	}
 
 	isEqual, fieldError := Equal(leftJSON, rightJSON)
+
+	fmt.Println("isEqual:", isEqual, ", FieldError:", fieldError)
+
 	assert.Equal(t, isEqual, false)
 	assert.Equal(t, fieldError, "results.#.id")
-	fmt.Println("isEqual:", isEqual, ", FieldError:", fieldError)
 }
