@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
 )
@@ -23,6 +24,7 @@ func TestEqual(t *testing.T) {
 	}
 
 	isEqual, fieldError := Equal(leftJSON, rightJSON)
-
+	assert.Equal(t, isEqual, false)
+	assert.Equal(t, fieldError, "results.#.id")
 	fmt.Println("isEqual:", isEqual, ", FieldError:", fieldError)
 }
