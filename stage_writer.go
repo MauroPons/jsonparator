@@ -30,6 +30,9 @@ func (writer Writer) Write(streamProducer <-chan StatusValidationError, context 
 			addRelativePathToFileError(writer, producerValue.RelativePath)
 			addRelativePathToFileParam(producerValue.RelativePath, "error")
 			addRelativePathToFileTypeError(producerValue.FieldError, producerValue.RelativePath)
+			if producerValue.StatusCodes != "200-200" {
+				addRelativePathToFileTypeError(producerValue.StatusCodes, producerValue.RelativePath)
+			}
 		}
 	}
 

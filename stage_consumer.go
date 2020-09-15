@@ -34,28 +34,32 @@ func (consumer Consumer) Consume(streamProducer <-chan HostsPair) <-chan StatusV
 }
 
 func (consumer Consumer) validate(hostsPair HostsPair) StatusValidationError {
-	isOk, fieldError := isComparisonJsonResponseOk(hostsPair, consumer.Exclude)
+	isOk, fieldError, statusCodes := isComparisonJsonResponseOk(hostsPair, consumer.Exclude)
 	return StatusValidationError{
 		RelativePath:   hostsPair.RelativeURL,
 		IsComparisonOk: isOk,
 		FieldError:     fieldError,
+		StatusCodes: 	statusCodes,
 	}
 }
 
-func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bool, string) {
+func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bool, string, string) {
+
+	statusCodes := hostsPair.getStatusCodes()
+
 	if hostsPair.Has401() {
 		panic("Authorization problem")
 	}
 	if hostsPair.HasErrors() || !hostsPair.EqualStatusCode() {
-		return false, "diff-status-code"
+		return false, "diff-status-code", statusCodes
 	}
 	leftJSON, err := unmarshal(hostsPair.Left.Body)
 	if err != nil {
-		return false, "error-unmarshal-left"
+		return false, "error-unmarshal-left", statusCodes
 	}
 	rightJSON, err := unmarshal(hostsPair.Right.Body)
 	if err != nil {
-		return false, "error-unmarshal-right"
+		return false, "error-unmarshal-right", statusCodes
 	}
 
 	if len(options.Exclude) > 0 {
@@ -67,9 +71,9 @@ func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bo
 	isEqual, fieldError := Equal(leftJSON, rightJSON)
 	if !isEqual {
 		fieldErrorCounter.Add(fieldError)
-		return false, fieldError
+		return false, fieldError, statusCodes
 	}
-	return true, "ok"
+	return true, "ok", statusCodes
 }
 
 func unmarshal(b []byte) (interface{}, error) {
@@ -81,7 +85,8 @@ func unmarshal(b []byte) (interface{}, error) {
 }
 
 type StatusValidationError struct {
-	RelativePath   string
-	IsComparisonOk bool
-	FieldError     string
+	RelativePath   	string
+	IsComparisonOk 	bool
+	FieldError     	string
+	StatusCodes	 	string
 }

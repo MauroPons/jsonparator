@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
 )
 
-func TestEqual(t *testing.T) {
+func TestEqualFieldsSorted(t *testing.T) {
 	jsonFileArrayBytes1, _ := ioutil.ReadFile("response-host-1.json")
 	jsonFileArrayBytes2, _ := ioutil.ReadFile("response-host-2.json")
 
@@ -24,8 +23,6 @@ func TestEqual(t *testing.T) {
 	}
 
 	isEqual, fieldError := Equal(leftJSON, rightJSON)
-
-	fmt.Println("isEqual:", isEqual, ", FieldError:", fieldError)
 
 	assert.Equal(t, isEqual, false)
 	assert.Equal(t, fieldError, "results.#.id")

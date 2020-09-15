@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -114,14 +115,7 @@ func (producer Producer) fetch(url URL) Host {
 			return host
 		}
 	}
-	if response.StatusCode != 200 {
-		// retry 3
-		response, err = producer.client.Do(request)
-		if err != nil {
-			host.Error = err
-			return host
-		}
-	}
+
 	host.URL = url.URL
 	host.Body, _ = ioutil.ReadAll(response.Body)
 	host.StatusCode = response.StatusCode
@@ -138,4 +132,8 @@ func (hostsPair HostsPair) EqualStatusCode() bool {
 
 func (hostsPair HostsPair) Has401() bool {
 	return hostsPair.Left.StatusCode == 401 || hostsPair.Right.StatusCode == 401
+}
+
+func (hostsPair HostsPair) getStatusCodes() string {
+	return fmt.Sprintf("%d-%d", hostsPair.Left.StatusCode, hostsPair.Right.StatusCode)
 }

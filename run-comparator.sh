@@ -22,6 +22,6 @@ for i in "${ARRAY_PATHS[@]}"
 do
 	for j in "${ARRAY_CHANNELS[@]}"
 	do
-		jsonparator -path "$i" -host "${SCOPE_1}" -host "${SCOPE_2}" -header "X-Auth-Token:${AUTH_TOKEN}" -header "X-Caller-Scopes:$j" -exclude "paging" -M "marketplace"
+		jsonparator -path "$i" -host "${SCOPE_1}" -V 3 -host "${SCOPE_2}" -header "X-Auth-Token:${AUTH_TOKEN}" -header "X-Caller-Scopes:$j" -exclude "paging" -M "marketplace"
 	done
 done
