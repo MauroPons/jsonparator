@@ -111,6 +111,7 @@ func action(contextClient *cli.Context) error {
 	fileRelativePathError = createFileError()
 	defer fileRelativePathError.Close()
 
+	fmt.Println("Separating files by parameter's cuts")
 	arrayAllParamsSorted = getAllParamsSorted(fileRelativePathSource)
 	createFilesByParams(arrayAllParamsSorted, "source")
 	createFilesByParams(arrayAllParamsSorted, "error")
