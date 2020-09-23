@@ -168,30 +168,31 @@ func separateFilesByParams() {
 }
 
 func summaryFieldError() {
-	var arrayFieldError []string
-	for key := range fieldErrorCounter.mapField {
-		arrayFieldError = append(arrayFieldError, key)
-	}
-	sort.Strings(arrayFieldError)
-	dir := options.BasePath + "/common-error-summary.csv"
-	fileSummary, err := os.Create(dir)
-	fi, err := fileSummary.Stat()
-	if err == nil && fi.Size() > 0 {
-		fmt.Println("Summary field's error: ")
-		w := bufio.NewWriter(fileSummary)
-		fmt.Fprintln(w, fmt.Sprintln("ATTRIBUTES,INCORRECT"))
-		for index := range arrayFieldError {
-			total := fieldErrorCounter.mapField[arrayFieldError[index]]
-			fmt.Fprintln(w, fmt.Sprintln(arrayFieldError[index], ",", total))
-			w.Flush()
+	if len(fieldErrorCounter.mapField) > 0 {
+		var arrayFieldError []string
+		for key := range fieldErrorCounter.mapField {
+			arrayFieldError = append(arrayFieldError, key)
 		}
-		table, _ := tablewriter.NewCSV(os.Stdout, dir, true)
-		table.SetAlignment(tablewriter.ALIGN_LEFT)
-		table.SetHeaderColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-			tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor})
-		table.SetColumnColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
-			tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlueColor})
-		table.Render()
+		sort.Strings(arrayFieldError)
+		dir := options.BasePath + "/common-error-summary.csv"
+		fileSummary, err := os.Create(dir)
+		if err == nil {
+			fmt.Println("Summary field's error: ")
+			w := bufio.NewWriter(fileSummary)
+			fmt.Fprintln(w, fmt.Sprintln("ATTRIBUTES,INCORRECT"))
+			for index := range arrayFieldError {
+				total := fieldErrorCounter.mapField[arrayFieldError[index]]
+				fmt.Fprintln(w, fmt.Sprintln(arrayFieldError[index], ",", total))
+				w.Flush()
+			}
+			table, _ := tablewriter.NewCSV(os.Stdout, dir, true)
+			table.SetAlignment(tablewriter.ALIGN_LEFT)
+			table.SetHeaderColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+				tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor})
+			table.SetColumnColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlackColor},
+				tablewriter.Colors{tablewriter.Bold, tablewriter.FgBlueColor})
+			table.Render()
+		}
 	}
 }
 
