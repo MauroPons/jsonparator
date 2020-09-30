@@ -4,12 +4,12 @@
 
 ##### Constants
 
-AUTH_TOKEN="17d39dea7cf2a11c2ec26a3c1433327716f05717d960d33df09354e225d3e1fc"
+AUTH_TOKEN="1f0d50324de9b11e49e700b31eff7338b7ccf3e196e4f4fd525aa389290237f3"
 SCOPE_1="https://read-batch_payment-methods.furyapps.io"
 SCOPE_2="https://production-reader_payment-methods-read-v2.furyapps.io"
 ARRAY_PATHS=(
-  "/Users/mpons/Documents/comparator/payment-methods/v2/T-LOTE/MCO/TOTAL/NONE/MCO-NONE.error"
-  "/Users/mpons/Documents/comparator/payment-methods/v2/T-LOTE/MCO/TOTAL/MELI/MCO-MELI.error"
+  "/Users/mpons/Documents/comparator/payment-methods/v2/LOTE-2/MCO/NONE/MCO-NONE.error"
+  "/Users/mpons/Documents/comparator/payment-methods/v2/LOTE-2/MCO/MELI/MCO-MELI.error"
 	#"/Users/mpons/Documents/comparator/payment-methods/v2/5_17-08-2020_21-08-2020/202008-10-15/MELI/MLM/MLM.error"
 	#"/Users/mpons/Documents/comparator/payment-methods/v2/5_17-08-2020_21-08-2020/202008-10-15/NONE/MLM/MLM.error"
 
@@ -22,6 +22,6 @@ for i in "${ARRAY_PATHS[@]}"
 do
 	for j in "${ARRAY_CHANNELS[@]}"
 	do
-		jsonparator -path "$i" -V 2 -host "${SCOPE_1}" -host "${SCOPE_2}" -header "X-Auth-Token:${AUTH_TOKEN}" -header "X-Caller-Scopes:$j" -E "paging" -E "results.#.payer_costs.#.payment_method_option_id" -M "marketplace"
+		jsonparator -path "$i" -host "${SCOPE_1}" -host "${SCOPE_2}" -V 5 -header "X-Auth-Token:${AUTH_TOKEN}" -header "X-Caller-Scopes:$j" -E "paging" -E "results.#.payer_costs.#.payment_method_option_id"
 	done
 done

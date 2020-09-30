@@ -12,6 +12,8 @@ const (
 	diffLengthBody  = "diff-length-body"
 	diffLengthArray = "diff-length-array"
 	diffValue       = "diff-value"
+	diffArrayEmpty = "diff-array-empty"
+	diffBodyEmpty  = "diff-body-empty"
 )
 
 func Equal(vx interface{}, vy interface{}) (bool, string) {
@@ -22,6 +24,9 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 	switch x := vx.(type) {
 	case map[string]interface{}:
 		y := vy.(map[string]interface{})
+		if len(x) > 0 && len(y) == 0 {
+			return false, diffBodyEmpty
+		}
 		if len(x) != len(y) {
 			return false, diffLengthBody
 		}
@@ -37,17 +42,15 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 			yv := y[k]
 			isEqual, fieldError := Equal(xv, yv)
 			if !isEqual {
-				if fieldError == diffLengthBody || fieldError == diffLengthArray || fieldError == diffType || fieldError == diffValue {
-					return false, k
-				} else {
-					return false, k + ".#." + fieldError
-				}
-
+				return false, k + ".#." + fieldError
 			}
 		}
 		return true, ""
 	case []interface{}:
 		y := vy.([]interface{})
+		if len(x) > 0 && len(y) == 0 {
+			return false, diffArrayEmpty
+		}
 		if len(x) != len(y) {
 			return false, diffLengthArray
 		}

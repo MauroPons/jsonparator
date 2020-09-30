@@ -48,11 +48,11 @@ type FieldErrorCounter struct {
 }
 
 func main() {
+	defer os.Exit(0)
 	app := newApp()
 	if err := app.Run(os.Args); err != nil {
 		fmt.Println(err)
 	}
-	os.Exit(0)
 }
 
 func newApp() *cli.App {
