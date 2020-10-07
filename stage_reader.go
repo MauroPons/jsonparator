@@ -64,7 +64,12 @@ func getUrl(host string, relativePath string) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
-	url.RawQuery = url.Query().Encode()
+	q := url.Query()
+
+	////TODO: remover Del Bins
+	//q.Del("bins")
+
+	url.RawQuery = q.Encode()
 	baseUrl, err := url.Parse(host)
 	if err != nil {
 		return nil, err

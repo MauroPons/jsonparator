@@ -50,9 +50,12 @@ func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bo
 	if hostsPair.Has401() {
 		panic("Authorization problem")
 	}
-	if hostsPair.HasErrors() || !hostsPair.EqualStatusCode() {
+	if hostsPair.HasErrors() || !hostsPair.EqualStatusCode(){
 		fieldErrorCounter.Add("diff-status-code")
 		return false, "diff-status-code", statusCodes
+	}
+	if !hostsPair.HasStatusCode200() {
+		return true, "ok", statusCodes
 	}
 	leftJSON, err := unmarshal(hostsPair.Left.Body)
 	if err != nil {

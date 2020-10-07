@@ -137,3 +137,7 @@ func (hostsPair HostsPair) Has401() bool {
 func (hostsPair HostsPair) getStatusCodes() string {
 	return fmt.Sprintf("%d-%d", hostsPair.Left.StatusCode, hostsPair.Right.StatusCode)
 }
+
+func (hostsPair HostsPair) HasStatusCode200() bool {
+	return hostsPair.Left.StatusCode == 200 && hostsPair.Right.StatusCode == 200
+}
