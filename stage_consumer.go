@@ -54,6 +54,7 @@ func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bo
 		fieldErrorCounter.Add("diff-status-code")
 		return false, "diff-status-code", statusCodes
 	}
+	// Eli esta es la modificacion
 	if !hostsPair.HasStatusCode200() {
 		return true, "ok", statusCodes
 	}
