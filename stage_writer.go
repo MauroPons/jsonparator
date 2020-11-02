@@ -19,9 +19,9 @@ func NewWriter() *Writer {
 	}
 }
 
-func (writer Writer) Write(streamProducer <-chan StatusValidationError, context context.Context) {
+func (writer Writer) Write(consumerStream <-chan StatusValidationError, context context.Context) {
 	countError := 0
-	for producerValue := range streamProducer {
+	for producerValue := range consumerStream {
 		if producerValue.IsComparisonOk {
 			progressBar.IncrementOk()
 		} else {
@@ -39,8 +39,8 @@ func (writer Writer) Write(streamProducer <-chan StatusValidationError, context 
 	options.FilePathTotalLinesError = countError
 
 	select {
-	case <-context.Done():
-	case <-streamProducer:
+		case <-context.Done():
+		case <-consumerStream:
 	}
 
 }

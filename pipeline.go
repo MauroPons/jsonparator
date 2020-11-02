@@ -19,8 +19,8 @@ func NewPipeline() *Pipeline {
 }
 
 func (pipeline *Pipeline) Run(ctx context.Context) {
-	streamReader := pipeline.reader.Read()
-	streamProducer := pipeline.producer.Produce(streamReader)
-	streamConsumer := pipeline.consumer.Consume(streamProducer)
-	pipeline.writer.Write(streamConsumer, ctx)
+	readerStream := pipeline.reader.Read()
+	producerStream := pipeline.producer.Produce(readerStream)
+	consumerStream := pipeline.consumer.Consume(producerStream)
+	pipeline.writer.Write(consumerStream, ctx)
 }
