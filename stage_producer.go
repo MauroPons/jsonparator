@@ -39,28 +39,25 @@ func getHttpClient() *http.Client {
 
 func (producer Producer) Produce(streamReader <-chan URLPair) <-chan HostsPair {
 	streamProducer := make(chan HostsPair)
-	var wg sync.WaitGroup
-	wg.Add(options.Currency)
-	velocityRPS := 60000 / (options.Velocity)
-	limiter := time.Tick(time.Duration(velocityRPS) * time.Millisecond)
-
 	go func() {
-		wg.Wait()
-		close(streamProducer)
-	}()
-
-	for w := 0; w < options.Currency; w++ {
-		go func() {
-			defer wg.Done()
-			for readerValue := range streamReader {
-				<-limiter
-				if !strings.Contains(readerValue.RelativePath, "request_ur") {
-					streamProducer <- producer.process(readerValue)
+		defer close(streamProducer)
+		var wg sync.WaitGroup
+		wg.Add(options.Currency)
+		velocityRPS := 60000 / (options.Velocity)
+		limiter := time.Tick(time.Duration(velocityRPS) * time.Millisecond)
+		for w := 0; w < options.Currency; w++ {
+			go func() {
+				defer wg.Done()
+				for readerValue := range streamReader {
+					<-limiter
+					if !strings.Contains(readerValue.RelativePath, "request_ur") {
+						streamProducer <- producer.process(readerValue)
+					}
 				}
-			}
-		}()
-	}
-
+			}()
+		}
+		wg.Wait()
+	}()
 	return streamProducer
 }
 

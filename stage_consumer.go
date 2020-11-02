@@ -16,28 +16,6 @@ func NewConsumer() *Consumer {
 
 func (consumer Consumer) Consume(streamProducer <-chan HostsPair) <-chan StatusValidationError {
 	streamConsumer := make(chan StatusValidationError)
-	var wg sync.WaitGroup
-	wg.Add(options.Currency)
-
-	go func() {
-		wg.Wait()
-		close(streamConsumer)
-	}()
-
-	for w := 0; w < options.Currency; w++ {
-		go func() {
-			defer wg.Done()
-			for producerValue := range streamProducer {
-				streamConsumer <- consumer.validate(producerValue)
-			}
-		}()
-	}
-
-	return streamConsumer
-}
-
-func (consumer Consumer) Consume_original(streamProducer <-chan HostsPair) <-chan StatusValidationError {
-	streamConsumer := make(chan StatusValidationError)
 	go func() {
 		defer close(streamConsumer)
 		var wg sync.WaitGroup
