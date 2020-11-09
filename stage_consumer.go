@@ -39,34 +39,34 @@ func (consumer Consumer) validate(hostsPair HostsPair) StatusValidationError {
 		RelativePath:   hostsPair.RelativeURL,
 		IsComparisonOk: isOk,
 		FieldError:     fieldError,
-		StatusCodes: 	statusCodes,
+		StatusCodes:    statusCodes,
 	}
 }
 
-func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bool, string, string) {
+func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bool, []string, string) {
 
 	statusCodes := hostsPair.getStatusCodes()
 
 	if hostsPair.Has401() {
 		panic("Authorization problem")
 	}
-	if hostsPair.HasErrors() || !hostsPair.EqualStatusCode(){
+	if hostsPair.HasErrors() || !hostsPair.EqualStatusCode() {
 		fieldErrorCounter.Add("diff-status-code")
-		return false, "diff-status-code", statusCodes
+		return false, []string{"diff-status-code"}, statusCodes
 	}
 	// Eli esta es la modificacion
 	if !hostsPair.HasStatusCode200() {
-		return true, "ok", statusCodes
+		return true, []string{"ok"}, statusCodes
 	}
 	leftJSON, err := unmarshal(hostsPair.Left.Body)
 	if err != nil {
 		fieldErrorCounter.Add("error-unmarshal-left")
-		return false, "error-unmarshal-left", statusCodes
+		return false, []string{"error-unmarshal-left"}, statusCodes
 	}
 	rightJSON, err := unmarshal(hostsPair.Right.Body)
 	if err != nil {
 		fieldErrorCounter.Add("error-unmarshal-right")
-		return false, "error-unmarshal-right", statusCodes
+		return false, []string{"error-unmarshal-right"}, statusCodes
 	}
 
 	if len(options.Exclude) > 0 {
@@ -75,12 +75,33 @@ func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bo
 			Remove(rightJSON, excludeField)
 		}
 	}
-	isEqual, fieldError := Equal(leftJSON, rightJSON)
-	if !isEqual {
-		fieldErrorCounter.Add(fieldError)
-		return false, fieldError, statusCodes
+
+	isEqual := false
+	fieldError := ""
+	var errorTypeFields []string
+
+	for !isEqual {
+		if fieldError != "" {
+			Remove(leftJSON, fieldError)
+			Remove(rightJSON, fieldError)
+			fieldError = ""
+		}
+		isEqual, fieldError = Equal(leftJSON, rightJSON)
+		if !isEqual {
+			errorTypeFields = append(errorTypeFields, fieldError)
+		}
 	}
-	return true, "ok", statusCodes
+
+	if len(errorTypeFields) > 0 {
+		return false, errorTypeFields, statusCodes
+	}
+
+	//isEqual, fieldError := Equal(leftJSON, rightJSON)
+	//if !isEqual {
+	//	fieldErrorCounter.Add(fieldError)
+	//	return false, fieldError, statusCodes
+	//}
+	return true, []string{"ok"}, statusCodes
 }
 
 func unmarshal(b []byte) (interface{}, error) {
@@ -92,8 +113,8 @@ func unmarshal(b []byte) (interface{}, error) {
 }
 
 type StatusValidationError struct {
-	RelativePath   	string
-	IsComparisonOk 	bool
-	FieldError     	string
-	StatusCodes	 	string
+	RelativePath   string
+	IsComparisonOk bool
+	FieldError     []string
+	StatusCodes    string
 }
