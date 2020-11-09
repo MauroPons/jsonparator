@@ -59,6 +59,7 @@ func addRelativePathToFileTypeError(fieldError string, relativePath string) {
 	w := bufio.NewWriter(file)
 	fmt.Fprintln(w, relativePath)
 	_ = w.Flush()
+	fieldErrorCounter.Add(fieldError)
 }
 
 func addRelativePathToFileError(writer Writer, relativePath string) {
