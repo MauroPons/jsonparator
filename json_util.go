@@ -12,8 +12,8 @@ const (
 	diffLengthBody  = "diff-length-body"
 	diffLengthArray = "diff-length-array"
 	diffValue       = "diff-value"
-	diffArrayEmpty = "diff-array-empty"
-	diffBodyEmpty  = "diff-body-empty"
+	diffArrayEmpty  = "diff-array-empty"
+	diffBodyEmpty   = "diff-body-empty"
 )
 
 func Equal(vx interface{}, vy interface{}) (bool, string) {
@@ -43,7 +43,7 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 				sort.Strings(arrayKeys)
 				fieldsDiff := ".#.sc1.#." + strings.Join(arrayKeys[:], ".#.")
 				return false, diffLengthBody + fieldsDiff
-			}else if lengthMapY > lengthMapX {
+			} else if lengthMapY > lengthMapX {
 				for k, _ := range x {
 					delete(y, k)
 				}

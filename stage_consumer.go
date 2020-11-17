@@ -4,6 +4,13 @@ import (
 	"sync"
 )
 
+const (
+	diffStatusCodeError      = "diff-status-code"
+	errorUnmarshalLeftError  = "error-unmarshal-left"
+	errorUnmarshalRightError = "error-unmarshal-right"
+	ok                       = "ok"
+)
+
 type Consumer struct {
 	Exclude []string
 }
@@ -24,7 +31,7 @@ func (consumer Consumer) Consume(streamProducer <-chan HostsPair) <-chan StatusV
 			go func() {
 				defer wg.Done()
 				for producerValue := range streamProducer {
-					streamConsumer <- consumer.validate(producerValue)
+					streamConsumer <- validate(producerValue, consumer.Exclude)
 				}
 			}()
 		}
@@ -33,14 +40,45 @@ func (consumer Consumer) Consume(streamProducer <-chan HostsPair) <-chan StatusV
 	return streamConsumer
 }
 
-func (consumer Consumer) validate(hostsPair HostsPair) StatusValidationError {
-	isOk, fieldError, statusCodes := isComparisonJsonResponseOk(hostsPair, consumer.Exclude)
-	return StatusValidationError{
+func validate(hostsPair HostsPair, fieldsToExclude []string) StatusValidationError {
+	var fieldErrorArray []string
+
+	isOk, fieldError, statusCodes := isComparisonJsonResponseOk(hostsPair, fieldsToExclude)
+	for !isOk {
+		if !isFieldErrorBasic(fieldError) {
+			fieldErrorArray = append(fieldErrorArray, fieldError)
+			fieldsToExclude = append(fieldsToExclude, fieldError)
+			isOk, fieldError, statusCodes = isComparisonJsonResponseOk(hostsPair, fieldsToExclude)
+		} else {
+			fieldErrorArray = append(fieldErrorArray, fieldError)
+			break
+		}
+	}
+
+	if len(fieldErrorArray) > 0 && fieldErrorArray[0] != ok {
+		isOk = false
+	} else {
+		isOk = true
+	}
+
+	result := StatusValidationError{
 		RelativePath:   hostsPair.RelativeURL,
 		IsComparisonOk: isOk,
-		FieldError:     fieldError,
-		StatusCodes: 	statusCodes,
+		FieldError:     fieldErrorArray,
+		StatusCodes:    statusCodes,
 	}
+	return result
+}
+
+func isFieldErrorBasic(fieldError string) bool {
+	switch fieldError {
+	case
+		diffStatusCodeError,
+		errorUnmarshalLeftError,
+		errorUnmarshalRightError:
+		return true
+	}
+	return false
 }
 
 func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bool, string, string) {
@@ -50,7 +88,7 @@ func isComparisonJsonResponseOk(hostsPair HostsPair, excludeFields []string) (bo
 	if hostsPair.Has401() {
 		panic("Authorization problem")
 	}
-	if hostsPair.HasErrors() || !hostsPair.EqualStatusCode(){
+	if hostsPair.HasErrors() || !hostsPair.EqualStatusCode() {
 		fieldErrorCounter.Add("diff-status-code")
 		return false, "diff-status-code", statusCodes
 	}
@@ -92,8 +130,8 @@ func unmarshal(b []byte) (interface{}, error) {
 }
 
 type StatusValidationError struct {
-	RelativePath   	string
-	IsComparisonOk 	bool
-	FieldError     	string
-	StatusCodes	 	string
+	RelativePath   string
+	IsComparisonOk bool
+	FieldError     []string
+	StatusCodes    string
 }

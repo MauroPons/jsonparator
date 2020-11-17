@@ -31,7 +31,7 @@ func (writer Writer) Write(consumerStream <-chan StatusValidationError, context 
 			addRelativePathToFileParam(producerValue.RelativePath, "error")
 			addRelativePathToFileTypeError(producerValue.FieldError, producerValue.RelativePath)
 			if producerValue.StatusCodes != "200-200" {
-				addRelativePathToFileTypeError(producerValue.StatusCodes, producerValue.RelativePath)
+				addRelativePathToFileTypeError([]string{producerValue.StatusCodes}, producerValue.RelativePath)
 			}
 		}
 	}
@@ -39,20 +39,22 @@ func (writer Writer) Write(consumerStream <-chan StatusValidationError, context 
 	options.FilePathTotalLinesError = countError
 
 	select {
-		case <-context.Done():
-		case <-consumerStream:
+	case <-context.Done():
+	case <-consumerStream:
 	}
 
 }
 
-func addRelativePathToFileTypeError(fieldError string, relativePath string) {
-	file := mapFileParams[fieldError]
-	if file == nil {
-		file = createFilesByTypeError(fieldError)
+func addRelativePathToFileTypeError(arrayFieldError []string, relativePath string) {
+	for _, value := range arrayFieldError {
+		file := mapFileParams[value]
+		if file == nil {
+			file = createFilesByTypeError(value)
+		}
+		w := bufio.NewWriter(file)
+		fmt.Fprintln(w, relativePath)
+		_ = w.Flush()
 	}
-	w := bufio.NewWriter(file)
-	fmt.Fprintln(w, relativePath)
-	_ = w.Flush()
 }
 
 func addRelativePathToFileError(writer Writer, relativePath string) {
