@@ -12,8 +12,6 @@ const (
 	diffLengthBody  = "diff-length-body"
 	diffLengthArray = "diff-length-array"
 	diffValue       = "diff-value"
-	diffArrayEmpty  = "diff-array-empty"
-	diffBodyEmpty   = "diff-body-empty"
 )
 
 func Equal(vx interface{}, vy interface{}) (bool, string) {
@@ -24,37 +22,7 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 	switch x := vx.(type) {
 	case map[string]interface{}:
 		y := vy.(map[string]interface{})
-		lengthMapX := len(x)
-		lengthMapY := len(y)
-
-		if lengthMapX > 0 && lengthMapY == 0 {
-			return false, diffBodyEmpty
-		}
-
-		if lengthMapX != lengthMapY {
-			if lengthMapX > lengthMapY {
-				for k, _ := range y {
-					delete(x, k)
-				}
-				var arrayKeys []string
-				for k := range x {
-					arrayKeys = append(arrayKeys, k)
-				}
-				sort.Strings(arrayKeys)
-				fieldsDiff := ".#.sc1.#." + strings.Join(arrayKeys[:], ".#.")
-				return false, diffLengthBody + fieldsDiff
-			} else if lengthMapY > lengthMapX {
-				for k, _ := range x {
-					delete(y, k)
-				}
-				var arrayKeys []string
-				for k := range y {
-					arrayKeys = append(arrayKeys, k)
-				}
-				sort.Strings(arrayKeys)
-				fieldsDiff := ".#.sc2.#." + strings.Join(arrayKeys[:], ".#.")
-				return false, diffLengthBody + fieldsDiff
-			}
+		if len(x) != len(y) {
 			return false, diffLengthBody
 		}
 		var arrayKeys []string
@@ -69,58 +37,28 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 			yv := y[k]
 			isEqual, fieldError := Equal(xv, yv)
 			if !isEqual {
-				return false, k + ".#." + fieldError
+				if fieldError == diffLengthBody || fieldError == diffLengthArray || fieldError == diffType || fieldError == diffValue {
+					return false, k
+				} else {
+					return false, k + ".#." + fieldError
+				}
 			}
 		}
 		return true, ""
 	case []interface{}:
 		y := vy.([]interface{})
-		if len(x) == 0 && len(y) == 0 {
-			return true, ""
-		}
-		if len(x) > 0 && len(y) == 0 {
-			return false, diffArrayEmpty
-		}
 		if len(x) != len(y) {
 			return false, diffLengthArray
 		}
-
-		switch x[0].(type) {
-		case string:
-			var xString []string
-			var yString []string
-			for _, param := range x {
-				xString = append(xString, param.(string))
-			}
-			for _, param := range y {
-				yString = append(yString, param.(string))
-			}
-			sort.Strings(xString)
-			sort.Strings(yString)
-
-			for index := range xString {
-				isEqual, fieldError := Equal(xString[index], yString[index])
-				if !isEqual {
-					return false, fieldError
-				}
-			}
-		default:
-			for index := range x {
-				isEqual, fieldError := Equal(x[index], y[index])
-				if !isEqual {
-					return false, fieldError
-				}
+		for index := range x {
+			isEqual, fieldError := Equal(x[index], y[index])
+			if !isEqual {
+				return false, fieldError
 			}
 		}
-
 		return true, ""
 	default:
-		areEquals := vx == vy
-		var fieldError string
-		if !areEquals {
-			fieldError = diffValue
-		}
-		return areEquals, fieldError
+		return vx == vy, diffValue
 	}
 }
 
