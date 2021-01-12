@@ -42,10 +42,10 @@ func (reader *Reader) Read() <-chan URLPair {
 			if !strings.Contains(relativePath, "request_ur") {
 				count++
 				leftUrl := URL{}
-				leftUrl.URL, leftUrl.Error = getUrl(reader.hosts[0], relativePath)
+				leftUrl.URL, leftUrl.Error = url.Parse(reader.hosts[0] + relativePath)
 
 				rightUrl := URL{}
-				rightUrl.URL, rightUrl.Error = getUrl(reader.hosts[1], relativePath)
+				rightUrl.URL, rightUrl.Error = url.Parse(reader.hosts[1] + relativePath)
 
 				streamReader <- URLPair{
 					pathLineNumber: count,
