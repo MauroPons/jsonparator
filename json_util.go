@@ -47,19 +47,49 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 		return true, ""
 	case []interface{}:
 		y := vy.([]interface{})
-		if len(x) != len(y) {
+		if len(x) != len(y) && len(x) > 0 && len(y) > 0 {
 			return false, diffLengthArray
 		}
-		for index := range x {
-			isEqual, fieldError := Equal(x[index], y[index])
-			if !isEqual {
-				return false, fieldError
+
+		var arrayX []string
+		var arrayY []string
+
+		if reflect.TypeOf(y[0]).Kind().String() == "string" {
+			arrayX  = toArrayString(x)
+			arrayY  = toArrayString(y)
+
+			sort.Strings(arrayX)
+			sort.Strings(arrayY)
+
+			for index := range x {
+				isEqual, fieldError := Equal(arrayX[index], arrayY[index])
+				if !isEqual {
+					return false, fieldError
+				}
 			}
+
+		}else{
+			for index := range x {
+				isEqual, fieldError := Equal(x[index], y[index])
+				if !isEqual {
+					return false, fieldError
+				}
+			}
+
 		}
+
 		return true, ""
 	default:
 		return vx == vy, diffValue
 	}
+}
+
+func toArrayString(arrayInterface []interface{}) []string {
+	var arrayString []string
+	for i := range arrayInterface {
+		arrayString = append(arrayString, arrayInterface[i].(string))
+	}
+	return arrayString
 }
 
 func Remove(i interface{}, path string) {

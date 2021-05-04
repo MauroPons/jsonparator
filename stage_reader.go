@@ -59,20 +59,20 @@ func (reader *Reader) Read() <-chan URLPair {
 	return streamReader
 }
 
-func getUrl(host string, relativePath string) (*url.URL, error) {
-	url, err := url.Parse(relativePath)
-	if err != nil {
-		return nil, err
-	}
-	q := url.Query()
-
-	////TODO: remover Del Bins
-	//q.Del("bins")
-
-	url.RawQuery = q.Encode()
-	baseUrl, err := url.Parse(host)
-	if err != nil {
-		return nil, err
-	}
-	return baseUrl.ResolveReference(url), nil
-}
+//func getUrl(host string, relativePath string) (*url.URL, error) {
+//	url, err := url.Parse(relativePath)
+//	if err != nil {
+//		return nil, err
+//	}
+//	q := url.Query()
+//
+//	////TODO: remover Del Bins
+//	//q.Del("bins")
+//
+//	url.RawQuery = q.Encode()
+//	baseUrl, err := url.Parse(host)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return baseUrl.ResolveReference(url), nil
+//}
