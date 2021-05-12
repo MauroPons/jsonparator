@@ -47,27 +47,31 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 		return true, ""
 	case []interface{}:
 		y := vy.([]interface{})
-		if len(x) != len(y) {
+		if len(x) != len(y){
 			return false, diffLengthArray
+		}
+
+		if len(x) == 0 && len(y) == 0{
+			return true, ""
 		}
 
 		var arrayX []string
 		var arrayY []string
 
-		if reflect.TypeOf(y[0]).Kind().String() == "string" {
+		itemY := y[0]
+		if reflect.TypeOf(itemY).Kind().String() == "string" {
 			arrayX  = toArrayString(x)
 			arrayY  = toArrayString(y)
 
 			sort.Strings(arrayX)
 			sort.Strings(arrayY)
 
-			for index := range x {
+			for index := range arrayX {
 				isEqual, fieldError := Equal(arrayX[index], arrayY[index])
 				if !isEqual {
 					return false, fieldError
 				}
 			}
-
 		}else{
 			for index := range x {
 				isEqual, fieldError := Equal(x[index], y[index])
