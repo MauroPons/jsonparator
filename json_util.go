@@ -47,7 +47,7 @@ func Equal(vx interface{}, vy interface{}) (bool, string) {
 		return true, ""
 	case []interface{}:
 		y := vy.([]interface{})
-		if len(x) != len(y) && len(x) > 0 && len(y) > 0 {
+		if len(x) != len(y) {
 			return false, diffLengthArray
 		}
 
